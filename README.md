@@ -1,6 +1,8 @@
 # high-low-card-game
 A card game where you guess if the next card is higher or lower than your current card, built using Flutter.
 
+:computer: :sparkles: [High Low Card Game Web App](https://melvincentvallecera.github.io/#/) :sparkles: :computer:
+
 Create an app that implements a high-low card game with the following specs:
 
 1. A card is shown and the player has to guess if the next card is >= or < the current card.
