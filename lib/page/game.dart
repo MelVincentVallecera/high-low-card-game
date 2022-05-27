@@ -1,10 +1,10 @@
-import 'package:cardguessgame/page/value.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
+import 'package:animated_button/animated_button.dart';
+import 'package:cardguessgame/page/value.dart';
 import 'package:cardguessgame/page/home.dart';
 import 'package:cardguessgame/widget/flip_card_widget.dart';
 import 'package:cardguessgame/widget/scoreDisplay.dart';
-import 'dart:math';
 
 var card = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'K', 'Q'];
 var value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -32,7 +32,7 @@ class _GamePageState extends State<GamePage> {
   var gameScore = 0;
   final controller = FlipCardController();
 
-  void pushToSlot() {
+  void pushToSlot() { // function to push values between previous cards
     lastCard5 = lastCard4;
     lastCard5Type = lastCard4Type;
     lastCard4 = lastCard3;
@@ -53,7 +53,7 @@ class _GamePageState extends State<GamePage> {
     guessCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
   }
 
-  charToInt(var input) {
+  charToInt(var input) { //function to get int value of card by matching the beginning char of the card
     var output = 0;
     for (int i = 0; i < 13; i++) {
       if (input.startsWith(card[i])) {
@@ -63,72 +63,44 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  Future openDialogMenu() => showDialog(
+  Future openDialogMenu() => showDialog( //Alert Dialog that displays when the home button on the app bar or the physical back button
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text(
-            'Menu',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 40),
-          ),
-          content: const Text('Do you want to exit this game?'),
+          title: const Text('Menu', textAlign: TextAlign.center, style: TextStyle(fontSize: 40),),
+          content: const Text('Exit the current game?', textAlign: TextAlign.center,),
           actions: [
-            TextButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    FadeRoute(
-                        page: const MyHomePage(
-                      title: '',
-                    )),
-                    (route) => false);
-              },
-              child: const Text('Yes'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('No'),
+                  onPressed: () {Navigator.pop(context);},
+                ),
+                TextButton(
+                  onPressed: () {Navigator.pushAndRemoveUntil(context, FadeRoute(page: const MyHomePage(title: '')), (route) => false);},
+                  child: const Text('Yes'),
+                ),
+              ],
             ),
           ],
         ),
       );
 
-  Future openDialogEnd() => showDialog(
+  Future openDialogEnd() => showDialog( //Alert Dialog to notify user of lost
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return WillPopScope(
             child: AlertDialog(
-              title: const Text(
-                'Game Over!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 40),
-              ),
-              content: Text(
-                'Your Score:\n$gameScore',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20),
-              ),
+              title: const Text('Game Over!', textAlign: TextAlign.center, style: TextStyle(fontSize: 40),),
+              content: Text('Your Score:\n$gameScore', textAlign: TextAlign.center, style: const TextStyle(fontSize: 20),),
               actions: <Widget>[
                 TextButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        FadeRoute(
-                            page: const MyHomePage(
-                          title: '',
-                        )),
-                        (route) => false);
-                  },
+                  onPressed: () {Navigator.pushAndRemoveUntil(context, FadeRoute(page: const MyHomePage(title: '',)), (route) => false);},
                   child: const Text('Home'),
                 ),
                 TextButton(
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(context,
-                          FadeRoute(page: GamePage()), (route) => false);
-                    },
+                    onPressed: () {Navigator.pushAndRemoveUntil(context, FadeRoute(page: GamePage()), (route) => false);},
                     child: const Text('Retry')),
               ],
             ),
@@ -163,42 +135,38 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        WillPopScope(
-          onWillPop: () async {
-            openDialogMenu();
-            return false;
-          },
+        WillPopScope( // trigger when user presses the physical back button, opens the in-game menu
+          onWillPop: () async {openDialogMenu(); return false;},
           child: Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.blue,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 10.0),
-                child: GestureDetector(
-                  onTap: () {
-                    openDialogMenu();
-                  },
-                  child: Image.asset(
-                    'assets/ui/home.png',
-                    scale: 4.0,
-                  ),
+              backgroundColor: Colors.black, //appbar color
+              titleSpacing: 0,
+              leading:
+              Padding(
+                padding: EdgeInsets.only(left: 1),
+                child: AnimatedButton(onPressed: () {openDialogMenu();}, //opens the menu dialog if the home button icon is pressed
+                  height: 55,
+                  width: 55,
+                  color: Colors.transparent,
+                  child: Image.asset('assets/ui/home.png', scale: 1.0,),
                 ),
               ),
               actions: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    alignment: const Alignment(-0.005, -0.8),
+                    alignment: Alignment.center,
                     child: scoreDisplay(gameScore),
                   ),
                 ),
+                SizedBox(width: 5,),
               ],
               elevation: 5.0,
-
             ),
             body: Center(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.blue[200],
+                  color: Colors.green[500], // background color
                 ),
               ),
             ),
@@ -219,8 +187,12 @@ class _GamePageState extends State<GamePage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      child: Image.asset(
-                          'assets/faces/${currentCard}${currentCardType}.png'),
+                      child: FlipCardWidget( //flips when you guess incorrectly
+                        controller: controller,
+                        front: Image.asset(
+                            'assets/faces/${guessCard}${guessCardType}.png'),
+                        back: Image.asset('assets/faces/backside.png'),
+                      ),
                     ),
                     Container(
                       height: 250,
@@ -228,12 +200,8 @@ class _GamePageState extends State<GamePage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      child: FlipCardWidget(
-                        controller: controller,
-                        front: Image.asset(
-                            'assets/faces/${guessCard}${guessCardType}.png'),
-                        back: Image.asset('assets/faces/backside.png'),
-                      ),
+                      child: Image.asset(
+                          'assets/faces/${currentCard}${currentCardType}.png'),
                     ),
                   ],
                 ),
@@ -307,49 +275,53 @@ class _GamePageState extends State<GamePage> {
         ),
         Center(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 100.0),
+            padding: const EdgeInsets.only(bottom: 120.0),
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Wrap(
                 spacing: 20,
                 children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      setState(
-                        () {
-                          if (charToInt(guessCard) <= charToInt(currentCard)) {
+                  AnimatedButton(
+                    height: 75,
+                    width: 85,
+                    color: Colors.transparent,
+                    onPressed: () {setState(() {
+                          if (charToInt(guessCard) > charToInt(currentCard)) {
                             gameScore += 1;
                             pushToSlot();
                           } else {
                             controller.flipCard();
                             openDialogEnd();
-                          }
-                        },
-                      );
-                    },
-                    child: Image.asset(
-                      'assets/ui/lessthan.png',
-                      scale: 5.0,
-                    ),
+                          }},);},
+                    child: Image.asset('assets/ui/higher.png', scale: 5.0,),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(
-                        () {
-                          if (charToInt(guessCard) >= charToInt(currentCard)) {
+                  AnimatedButton(
+                    height: 75,
+                    width: 85,
+                    color: Colors.transparent,
+                    onPressed: () {setState(() {
+                      if (charToInt(guessCard) == charToInt(currentCard)) {
+                        gameScore += 1;
+                        pushToSlot();
+                      } else {
+                        controller.flipCard();
+                        openDialogEnd();
+                      }},);},
+                    child: Image.asset('assets/ui/equal.png', scale: 5.0,),
+                  ),
+                  AnimatedButton(
+                    height: 75,
+                    width: 85,
+                    color: Colors.transparent,
+                    onPressed: () {setState(() {
+                          if (charToInt(guessCard) < charToInt(currentCard)) {
                             gameScore += 1;
                             pushToSlot();
                           } else {
                             controller.flipCard();
                             openDialogEnd();
-                          }
-                        },
-                      );
-                    },
-                    child: Image.asset(
-                      'assets/ui/greaterthan.png',
-                      scale: 5.0,
-                    ),
+                          }},);},
+                    child: Image.asset('assets/ui/lower.png', scale: 5.0,),
                   ),
                 ],
               ),

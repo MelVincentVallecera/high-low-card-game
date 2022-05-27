@@ -2,6 +2,7 @@ import 'package:cardguessgame/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
