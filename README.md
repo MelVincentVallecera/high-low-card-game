@@ -3,7 +3,7 @@ A card game where you guess if the next card is higher or lower than your curren
 
 :computer: :sparkles: [High Low Card Game Web App](https://melvincentvallecera.github.io/highlowcard-web/#/) :sparkles: :computer:
 
-:robot: A downloadale zip file containing the Android apk is available at [Releases](https://github.com/MelVincentVallecera/high-low-card-game/releases/tag/Release).
+:robot: Android apk is available at [Releases](https://github.com/MelVincentVallecera/high-low-card-game/releases/tag/Release).
 
 Create an app that implements a high-low card game with the following specs:
 
