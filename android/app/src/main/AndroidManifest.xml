@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.team10.cardguessgame.cardguessgame">
    <application
-        android:label="cardguessgame"
+        android:label="Higher or Lower Card"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
