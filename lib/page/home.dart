@@ -17,7 +17,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('How to Play',textAlign: TextAlign.center),
-        content: const Text('A card is shown and you have to guess if\nthe next card is > or < the current card.\nIf you guess correctly, you get points.\nIf you get it wrong, the game ends', textAlign: TextAlign.center,),
+        content: const Text('A card is shown and you have to guess if the next card is >, < or = to the current card. If you guess correctly, you get points.If you get it wrong, the game ends', textAlign: TextAlign.center,),
         actions: [
           Center(
             child: TextButton(
@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('About',textAlign: TextAlign.center,),
-      content: const Text('This app was made by Team10.\nMembers:\nStephen Abueva\nJoanah Mae Bulabos\nMelanie Orot\nMel Vincent Vallecera',textAlign: TextAlign.center,),
+      content: const Text('This app was made by\nMel Vincent Vallecera\nBSCpE 3B',textAlign: TextAlign.center,),
       actions: [
         Center(
           child: TextButton(
