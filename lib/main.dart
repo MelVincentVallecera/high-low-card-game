@@ -1,6 +1,7 @@
 import 'package:cardguessgame/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 
 Future main() async{
@@ -14,6 +15,9 @@ Future main() async{
 
 Future initialization(BuildContext? context) async {
   ///Load resources
+  final AudioCache player = AudioCache(prefix: 'assets/audio/');
+  player.loadAll(['bgm_1.mp3','bgm_2.mp3','bgm_3.mp3','start.mp3','about.mp3','help.mp3','y.mp3','n.mp3']);
+
   await Future.delayed(const Duration(seconds: 3));
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cardguessgame/page/game.dart';
 import 'package:double_back_to_close_app/double_back_to_close_app.dart';
 import 'package:animated_button/animated_button.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -12,17 +13,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  AudioCache player = AudioCache();
 
   Future openDialogHelp() => showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('How to Play',textAlign: TextAlign.center),
-        content: const Text('A card is shown and you have to guess if the next card is >, < or = to the current card. If you guess correctly, you get points.If you get it wrong, the game ends', textAlign: TextAlign.center,),
+        content: const Text('A card is shown and you have to guess if the\nnext card is >, < or = to the current card.\nIf you guess correctly, you get points.\nIf you get it wrong, the game ends', textAlign: TextAlign.center,),
         actions: [
           Center(
             child: TextButton(
               child: const Text('Ok'),
-              onPressed: () {Navigator.pop(context);},
+              onPressed: () {
+                player.play('button_y.mp3');
+                Navigator.pop(context);
+                },
             ),
           ),
         ],
@@ -38,12 +43,21 @@ class _MyHomePageState extends State<MyHomePage> {
         Center(
           child: TextButton(
             child: const Text('Ok'),
-            onPressed: () {Navigator.pop(context);},
+            onPressed: () {
+              Navigator.pop(context);
+              player.play('button_y.mp3');
+              },
           ),
         ),
       ],
     ),
   );
+  @override
+  void initState() {
+    super.initState();
+    player.loop('bgm_1.mp3');
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       AnimatedButton(
                         width: 100,
                         color: Colors.transparent,
-                        onPressed: () {Navigator.pushReplacement(context, FadeRoute(page: GamePage()));},
+                        onPressed: () {player.play('button_start.mp3');
+                          Navigator.pushReplacement(context, FadeRoute(page: GamePage()));},
                         child: Image.asset('assets/ui/play.png', scale: 4.0,),
                       ),
 
@@ -93,7 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       AnimatedButton(
                         width: 100,
                         color: Colors.transparent,
-                        onPressed: () {openDialogHelp();},
+                        onPressed: () {player.play('button_help.mp3');
+                          openDialogHelp();},
                         child: Image.asset('assets/ui/help.png', scale: 5.0,),
                       ),
 
@@ -101,7 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       AnimatedButton(
                         width: 100,
                         color: Colors.transparent,
-                        onPressed: () {openDialogInfo();},
+                        onPressed: () {player.play('button_about.mp3');
+                          openDialogInfo();},
                         child: Image.asset('assets/ui/about.png', scale: 6.0,),
                       ),
                     ],
