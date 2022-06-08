@@ -16,6 +16,9 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  AudioPlayer player = AudioPlayer();
+  AudioCache cache = AudioCache(prefix: 'assets/audio/');
+
   var guessCard;
   var guessCardType;
   var currentCard;
@@ -55,6 +58,14 @@ class _GamePageState extends State<GamePage> {
     guessCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
   }
 
+  void _playLoop() async {
+    player = await cache.loop('bgm_2.mp3');
+  }
+
+  void _stopLoop() {
+    player?.stop();
+  }
+
   charToInt(var input) {
     //function to get int value of card by matching the beginning char of the card
     var output = 0;
@@ -86,11 +97,14 @@ class _GamePageState extends State<GamePage> {
                 TextButton(
                   child: const Text('No'),
                   onPressed: () {
+                    cache.play('button_n.mp3');
                     Navigator.pop(context);
                   },
                 ),
                 TextButton(
                   onPressed: () {
+                    cache.play('button_y.mp3');
+                    _stopLoop();
                     Navigator.pushAndRemoveUntil(
                         context,
                         FadeRoute(page: const MyHomePage(title: '')),
@@ -127,6 +141,8 @@ class _GamePageState extends State<GamePage> {
                   children: [
                     TextButton(
                       onPressed: () {
+                        cache.play('button_n.mp3');
+                        _stopLoop();
                         Navigator.pushAndRemoveUntil(
                             context,
                             FadeRoute(
@@ -139,6 +155,8 @@ class _GamePageState extends State<GamePage> {
                     ),
                     TextButton(
                         onPressed: () {
+                          cache.play('button_y.mp3');
+                          _stopLoop();
                           Navigator.pushAndRemoveUntil(context,
                               FadeRoute(page: GamePage()), (route) => false);
                         },
@@ -155,6 +173,19 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
+
+    cache.loadAll([
+      'bgm_2.mp3',
+      'button_high.mp3',
+      'button_low.mp3',
+      'button_equal.mp3',
+      'button_home.mp3',
+      'answer_correct.mp3',
+      'answer_wrong.mp3',
+      'button_y.mp3',
+      'button_n.mp3'
+    ]);
+    _playLoop();
 
     guessCard = Value().cardValue[Random().nextInt(Value().cardValue.length)];
     guessCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
@@ -193,6 +224,7 @@ class _GamePageState extends State<GamePage> {
                 padding: EdgeInsets.only(left: 1),
                 child: AnimatedButton(
                   onPressed: () {
+                    cache.play('button_home.mp3');
                     openDialogMenu();
                   },
                   //opens the menu dialog if the home button icon is pressed
@@ -345,10 +377,13 @@ class _GamePageState extends State<GamePage> {
                     onPressed: () {
                       setState(
                         () {
+                          cache.play('button_high.mp3');
                           if (charToInt(guessCard) > charToInt(currentCard)) {
+                            cache.play('answer_correct.mp3');
                             gameScore += 1;
                             pushToSlot();
                           } else {
+                            cache.play('answer_wrong.mp3');
                             controller.flipCard();
                             openDialogEnd();
                           }
@@ -367,10 +402,13 @@ class _GamePageState extends State<GamePage> {
                     onPressed: () {
                       setState(
                         () {
+                          cache.play('button_equal.mp3');
                           if (charToInt(guessCard) == charToInt(currentCard)) {
+                            cache.play('answer_correct.mp3');
                             gameScore += 1;
                             pushToSlot();
                           } else {
+                            cache.play('answer_wrong.mp3');
                             controller.flipCard();
                             openDialogEnd();
                           }
@@ -389,10 +427,13 @@ class _GamePageState extends State<GamePage> {
                     onPressed: () {
                       setState(
                         () {
+                          cache.play('button_low.mp3');
                           if (charToInt(guessCard) < charToInt(currentCard)) {
                             gameScore += 1;
+                            cache.play('answer_correct.mp3');
                             pushToSlot();
                           } else {
+                            cache.play('answer_wrong.mp3');
                             controller.flipCard();
                             openDialogEnd();
                           }
