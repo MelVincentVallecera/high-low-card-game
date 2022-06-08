@@ -16,7 +16,7 @@ class scoreDisplay extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
             color: Colors.white,
       ),
-      child: Text('SCORE:           $gameScore', style: const TextStyle(color: Colors.black, fontSize: 25),
+      child: Text('SCORE:           $gameScore', style: const TextStyle(color: Colors.black, fontSize: 25,),textDirection: TextDirection.rtl,
       ),
     );
   }

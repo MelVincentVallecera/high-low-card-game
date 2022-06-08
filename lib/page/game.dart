@@ -5,6 +5,7 @@ import 'package:cardguessgame/page/value.dart';
 import 'package:cardguessgame/page/home.dart';
 import 'package:cardguessgame/widget/flip_card_widget.dart';
 import 'package:cardguessgame/widget/scoreDisplay.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 var card = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'K', 'Q'];
 var value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -15,6 +16,9 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  AudioPlayer player = AudioPlayer();
+  AudioCache cache = AudioCache(prefix: 'assets/audio/');
+
   var guessCard;
   var guessCardType;
   var currentCard;
@@ -32,7 +36,8 @@ class _GamePageState extends State<GamePage> {
   var gameScore = 0;
   final controller = FlipCardController();
 
-  void pushToSlot() { // function to push values between previous cards
+  void pushToSlot() {
+    // function to push values between previous cards
     lastCard5 = lastCard4;
     lastCard5Type = lastCard4Type;
     lastCard4 = lastCard3;
@@ -53,7 +58,16 @@ class _GamePageState extends State<GamePage> {
     guessCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
   }
 
-  charToInt(var input) { //function to get int value of card by matching the beginning char of the card
+  void _playLoop() async {
+    player = await cache.loop('bgm_2.mp3');
+  }
+
+  void _stopLoop() {
+    player?.stop();
+  }
+
+  charToInt(var input) {
+    //function to get int value of card by matching the beginning char of the card
     var output = 0;
     for (int i = 0; i < 13; i++) {
       if (input.startsWith(card[i])) {
@@ -63,21 +77,39 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  Future openDialogMenu() => showDialog( //Alert Dialog that displays when the home button on the app bar or the physical back button
+  Future openDialogMenu() => showDialog(
+        //Alert Dialog that displays when the home button on the app bar or the physical back button
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Menu', textAlign: TextAlign.center, style: TextStyle(fontSize: 40),),
-          content: const Text('Exit the current game?', textAlign: TextAlign.center,),
+          title: const Text(
+            'Menu',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 40),
+          ),
+          content: const Text(
+            'Exit the current game?',
+            textAlign: TextAlign.center,
+          ),
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
                   child: const Text('No'),
-                  onPressed: () {Navigator.pop(context);},
+                  onPressed: () {
+                    cache.play('button_n.mp3');
+                    Navigator.pop(context);
+                  },
                 ),
                 TextButton(
-                  onPressed: () {Navigator.pushAndRemoveUntil(context, FadeRoute(page: const MyHomePage(title: '')), (route) => false);},
+                  onPressed: () {
+                    cache.play('button_y.mp3');
+                    _stopLoop();
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        FadeRoute(page: const MyHomePage(title: '')),
+                        (route) => false);
+                  },
                   child: const Text('Yes'),
                 ),
               ],
@@ -86,22 +118,51 @@ class _GamePageState extends State<GamePage> {
         ),
       );
 
-  Future openDialogEnd() => showDialog( //Alert Dialog to notify user of lost
+  Future openDialogEnd() => showDialog(
+        //Alert Dialog to notify user of lost
         barrierDismissible: false,
         context: context,
         builder: (context) {
           return WillPopScope(
             child: AlertDialog(
-              title: const Text('Game Over!', textAlign: TextAlign.center, style: TextStyle(fontSize: 40),),
-              content: Text('Your Score:\n$gameScore', textAlign: TextAlign.center, style: const TextStyle(fontSize: 20),),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {Navigator.pushAndRemoveUntil(context, FadeRoute(page: const MyHomePage(title: '',)), (route) => false);},
-                  child: const Text('Home'),
+              title: const Text(
+                'Game Over!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 40),
+              ),
+              content: Text(
+                'Your Score:\n$gameScore',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 20),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        cache.play('button_n.mp3');
+                        _stopLoop();
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            FadeRoute(
+                                page: const MyHomePage(
+                              title: '',
+                            )),
+                            (route) => false);
+                      },
+                      child: const Text('Home'),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          cache.play('button_y.mp3');
+                          _stopLoop();
+                          Navigator.pushAndRemoveUntil(context,
+                              FadeRoute(page: GamePage()), (route) => false);
+                        },
+                        child: const Text('Retry')),
+                  ],
                 ),
-                TextButton(
-                    onPressed: () {Navigator.pushAndRemoveUntil(context, FadeRoute(page: GamePage()), (route) => false);},
-                    child: const Text('Retry')),
               ],
             ),
             onWillPop: () async => false,
@@ -112,6 +173,19 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
+
+    cache.loadAll([
+      'bgm_2.mp3',
+      'button_high.mp3',
+      'button_low.mp3',
+      'button_equal.mp3',
+      'button_home.mp3',
+      'answer_correct.mp3',
+      'answer_wrong.mp3',
+      'button_y.mp3',
+      'button_n.mp3'
+    ]);
+    _playLoop();
 
     guessCard = Value().cardValue[Random().nextInt(Value().cardValue.length)];
     guessCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
@@ -135,20 +209,32 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        WillPopScope( // trigger when user presses the physical back button, opens the in-game menu
-          onWillPop: () async {openDialogMenu(); return false;},
+        WillPopScope(
+          // trigger when user presses the physical back button, opens the in-game menu
+          onWillPop: () async {
+            openDialogMenu();
+            return false;
+          },
           child: Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.black, //appbar color
+              backgroundColor: Colors.black,
+              //appbar color
               titleSpacing: 0,
-              leading:
-              Padding(
+              leading: Padding(
                 padding: EdgeInsets.only(left: 1),
-                child: AnimatedButton(onPressed: () {openDialogMenu();}, //opens the menu dialog if the home button icon is pressed
+                child: AnimatedButton(
+                  onPressed: () {
+                    cache.play('button_home.mp3');
+                    openDialogMenu();
+                  },
+                  //opens the menu dialog if the home button icon is pressed
                   height: 55,
                   width: 55,
                   color: Colors.transparent,
-                  child: Image.asset('assets/ui/home.png', scale: 1.0,),
+                  child: Image.asset(
+                    'assets/ui/home.png',
+                    scale: 1.0,
+                  ),
                 ),
               ),
               actions: [
@@ -159,7 +245,9 @@ class _GamePageState extends State<GamePage> {
                     child: scoreDisplay(gameScore),
                   ),
                 ),
-                SizedBox(width: 5,),
+                SizedBox(
+                  width: 5,
+                ),
               ],
               elevation: 5.0,
             ),
@@ -187,7 +275,8 @@ class _GamePageState extends State<GamePage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      child: FlipCardWidget( //flips when you guess incorrectly
+                      child: FlipCardWidget(
+                        //flips when you guess incorrectly
                         controller: controller,
                         front: Image.asset(
                             'assets/faces/${guessCard}${guessCardType}.png'),
@@ -275,7 +364,7 @@ class _GamePageState extends State<GamePage> {
         ),
         Center(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 120.0),
+            padding: const EdgeInsets.only(bottom: 100.0),
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Wrap(
@@ -285,43 +374,76 @@ class _GamePageState extends State<GamePage> {
                     height: 75,
                     width: 85,
                     color: Colors.transparent,
-                    onPressed: () {setState(() {
+                    onPressed: () {
+                      setState(
+                        () {
+                          cache.play('button_high.mp3');
                           if (charToInt(guessCard) > charToInt(currentCard)) {
+                            cache.play('answer_correct.mp3');
                             gameScore += 1;
                             pushToSlot();
                           } else {
+                            cache.play('answer_wrong.mp3');
                             controller.flipCard();
                             openDialogEnd();
-                          }},);},
-                    child: Image.asset('assets/ui/higher.png', scale: 5.0,),
+                          }
+                        },
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/ui/higher.png',
+                      scale: 5.0,
+                    ),
                   ),
                   AnimatedButton(
                     height: 75,
                     width: 85,
                     color: Colors.transparent,
-                    onPressed: () {setState(() {
-                      if (charToInt(guessCard) == charToInt(currentCard)) {
-                        gameScore += 1;
-                        pushToSlot();
-                      } else {
-                        controller.flipCard();
-                        openDialogEnd();
-                      }},);},
-                    child: Image.asset('assets/ui/equal.png', scale: 5.0,),
+                    onPressed: () {
+                      setState(
+                        () {
+                          cache.play('button_equal.mp3');
+                          if (charToInt(guessCard) == charToInt(currentCard)) {
+                            cache.play('answer_correct.mp3');
+                            gameScore += 1;
+                            pushToSlot();
+                          } else {
+                            cache.play('answer_wrong.mp3');
+                            controller.flipCard();
+                            openDialogEnd();
+                          }
+                        },
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/ui/equal.png',
+                      scale: 5.0,
+                    ),
                   ),
                   AnimatedButton(
                     height: 75,
                     width: 85,
                     color: Colors.transparent,
-                    onPressed: () {setState(() {
+                    onPressed: () {
+                      setState(
+                        () {
+                          cache.play('button_low.mp3');
                           if (charToInt(guessCard) < charToInt(currentCard)) {
                             gameScore += 1;
+                            cache.play('answer_correct.mp3');
                             pushToSlot();
                           } else {
+                            cache.play('answer_wrong.mp3');
                             controller.flipCard();
                             openDialogEnd();
-                          }},);},
-                    child: Image.asset('assets/ui/lower.png', scale: 5.0,),
+                          }
+                        },
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/ui/lower.png',
+                      scale: 5.0,
+                    ),
                   ),
                 ],
               ),
