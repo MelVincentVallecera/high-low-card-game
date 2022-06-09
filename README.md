@@ -5,6 +5,11 @@ A card game where you guess if the next card is higher or lower than your curren
 
 :robot: Android apk is available at [Releases](https://github.com/MelVincentVallecera/high-low-card-game/releases/tag/Release).
 
+Features 
+* High Low Card Game
+* Highscore system using Firebase
+
+
 Create an app that implements a high-low card game with the following specs:
 
 1. A card is shown and the player has to guess if the next card is >= or < the current card.
