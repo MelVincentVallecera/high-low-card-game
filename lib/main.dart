@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cardguessgame/firebase_options.dart';
 import 'package:cardguessgame/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ///Set preferred orientation for device, in this case portrait only
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
@@ -15,6 +19,10 @@ Future main() async {
 
 Future initialization(BuildContext? context) async {
   ///Load resources
+  Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  ///Loads mp3 files to be used in the app
   final AudioCache cache = AudioCache(prefix: 'assets/audio/');
   cache.loadAll([
     'bgm_1.mp3',
@@ -53,9 +61,66 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+  final _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  /// dialog box to ask user for their name to be used when submitting scores to firebase for highscores
+  Future openDialogName() => showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Enter Your Name', textAlign: TextAlign.center),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _nameController,
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.account_circle_outlined),
+            border: OutlineInputBorder(),
+          ),
+          validator: (text) {
+            if (text == null || text.isEmpty) {
+              return 'Please enter name';
+            }
+            return null;
+          },
+        ),
+      ),
+      actions: [
+        Center(
+          child: TextButton(
+            child: const Text('Submit'),
+            onPressed: () {setState(() {
+              if(_formKey.currentState!.validate()) {
+                submitName();
+                Navigator.pushReplacement(
+                    context,
+                    FadeRoute(
+                        page: MyHomePage(
+                          title: '',
+                        )));
+              }
+            });
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+ /// uses sharedpreference package to store user's name
+  void submitName() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear(); ///clears previous user's name stored
+    prefs.setString("name", _nameController.text);
+  }
+
   @override
   void initState() {
     super.initState();
+  }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -82,14 +147,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
               ),
             ),
           ),
+          ///when user taps the screen, it opens a dialog box
           GestureDetector(
             onTap: () {
-              Navigator.pushReplacement(
-                  context,
-                  FadeRoute(
-                      page: MyHomePage(
-                    title: '',
-                  )));
+              openDialogName();
             },
             child: Container(
               height: MediaQuery.of(context).size.height,

@@ -8,15 +8,15 @@ class scoreDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200,
+      width: 150,
       height: 100,
-      alignment: Alignment.center,
+      alignment: Alignment.centerLeft,
       padding: EdgeInsets.all(5.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
             color: Colors.white,
       ),
-      child: Text('SCORE:           $gameScore', style: const TextStyle(color: Colors.black, fontSize: 25,),textDirection: TextDirection.rtl,
+      child: Text('SCORE: $gameScore', style: const TextStyle(color: Colors.black, fontSize: 20,),textDirection: TextDirection.rtl,
       ),
     );
   }

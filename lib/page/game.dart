@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:animated_button/animated_button.dart';
@@ -6,6 +7,9 @@ import 'package:cardguessgame/page/home.dart';
 import 'package:cardguessgame/widget/flip_card_widget.dart';
 import 'package:cardguessgame/widget/scoreDisplay.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../widget/livesDisplay.dart';
 
 var card = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'K', 'Q'];
 var value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -34,6 +38,7 @@ class _GamePageState extends State<GamePage> {
   var lastCard5;
   var lastCard5Type;
   var gameScore = 0;
+  var gameLives;
   final controller = FlipCardController();
 
   void pushToSlot() {
@@ -63,7 +68,21 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _stopLoop() {
-    player?.stop();
+    player.stop();
+  }
+
+  void submitScore() async {
+    //get access to collection
+    var database = FirebaseFirestore.instance;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? nameValue = prefs.getString("name");
+    //only outputs score if its higher than 0
+    if(gameScore > 0) {
+      database.collection('highscores').add({
+        "name": nameValue,
+        "score": gameScore,
+      });
+    }
   }
 
   charToInt(var input) {
@@ -173,7 +192,6 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
-
     cache.loadAll([
       'bgm_2.mp3',
       'button_high.mp3',
@@ -186,12 +204,11 @@ class _GamePageState extends State<GamePage> {
       'button_n.mp3'
     ]);
     _playLoop();
-
+    gameLives = 3;
     guessCard = Value().cardValue[Random().nextInt(Value().cardValue.length)];
     guessCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
     currentCard = Value().cardValue[Random().nextInt(Value().cardValue.length)];
-    currentCardType =
-        Value().cardType[Random().nextInt(Value().cardType.length)];
+    currentCardType = Value().cardType[Random().nextInt(Value().cardType.length)];
 
     lastCard1 = "temp";
     lastCard1Type = "Slot";
@@ -221,7 +238,7 @@ class _GamePageState extends State<GamePage> {
               //appbar color
               titleSpacing: 0,
               leading: Padding(
-                padding: EdgeInsets.only(left: 1),
+                padding: EdgeInsets.only(left: 1.5),
                 child: AnimatedButton(
                   onPressed: () {
                     cache.play('button_home.mp3');
@@ -238,6 +255,13 @@ class _GamePageState extends State<GamePage> {
                 ),
               ),
               actions: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                  alignment: Alignment.center,
+                  child: livesDisplay(gameLives),
+                ),
+              ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -364,7 +388,7 @@ class _GamePageState extends State<GamePage> {
         ),
         Center(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 100.0),
+            padding: const EdgeInsets.only(bottom: 70.0),
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Wrap(
@@ -378,13 +402,20 @@ class _GamePageState extends State<GamePage> {
                       setState(
                         () {
                           cache.play('button_high.mp3');
-                          if (charToInt(guessCard) > charToInt(currentCard)) {
-                            cache.play('answer_correct.mp3');
-                            gameScore += 1;
-                            pushToSlot();
-                          } else {
-                            cache.play('answer_wrong.mp3');
+                          if(gameLives != 0) {
+                            if (charToInt(guessCard) > charToInt(currentCard)) {
+                              gameScore += 1;
+                              cache.play('answer_correct.mp3');
+                              pushToSlot();
+                            } else {
+                              cache.play('answer_wrong.mp3');
+                              gameLives--;
+                              pushToSlot();
+                            }
+                          }
+                          else {
                             controller.flipCard();
+                            submitScore();
                             openDialogEnd();
                           }
                         },
@@ -403,13 +434,20 @@ class _GamePageState extends State<GamePage> {
                       setState(
                         () {
                           cache.play('button_equal.mp3');
-                          if (charToInt(guessCard) == charToInt(currentCard)) {
-                            cache.play('answer_correct.mp3');
-                            gameScore += 1;
-                            pushToSlot();
-                          } else {
-                            cache.play('answer_wrong.mp3');
+                          if(gameLives != 0) {
+                            if (charToInt(guessCard) == charToInt(currentCard)) {
+                              gameScore += 1;
+                              cache.play('answer_correct.mp3');
+                              pushToSlot();
+                            } else {
+                              cache.play('answer_wrong.mp3');
+                              gameLives--;
+                              pushToSlot();
+                            }
+                          }
+                          else {
                             controller.flipCard();
+                            submitScore();
                             openDialogEnd();
                           }
                         },
@@ -428,13 +466,20 @@ class _GamePageState extends State<GamePage> {
                       setState(
                         () {
                           cache.play('button_low.mp3');
-                          if (charToInt(guessCard) < charToInt(currentCard)) {
-                            gameScore += 1;
-                            cache.play('answer_correct.mp3');
-                            pushToSlot();
-                          } else {
-                            cache.play('answer_wrong.mp3');
+                          if(gameLives != 0) {
+                            if (charToInt(guessCard) < charToInt(currentCard)) {
+                              gameScore += 1;
+                              cache.play('answer_correct.mp3');
+                              pushToSlot();
+                            } else {
+                              cache.play('answer_wrong.mp3');
+                              gameLives--;
+                              pushToSlot();
+                            }
+                          }
+                          else {
                             controller.flipCard();
+                            submitScore();
                             openDialogEnd();
                           }
                         },
