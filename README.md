@@ -7,7 +7,7 @@ A card game where you guess if the next card is higher or lower than your curren
 
 Features 
 * High Low Card Game
-* Highscore system using Firebase
+* Cloud Highscore system using Firebase
 
 
 Create an app that implements a high-low card game with the following specs:
